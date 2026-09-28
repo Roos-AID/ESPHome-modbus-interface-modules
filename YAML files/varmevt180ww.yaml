@@ -1,0 +1,484 @@
+# =============================================================================
+# ESPHome ESP32-C6 config: Reader voor VARME warmtepomp boiler
+substitutions:
+  device_name: "varme-vt180ww"
+  device_friendlyname: Varme wp boiler
+  device_description: HA to interface with Varme heatpump boiler
+  version: "v26.09.27"
+  # Modbus-adres en baudrate
+  modbus_address: "1"
+  baudrate: "19200"   
+#
+# WAT DOET DIT?
+# Deze versie leest de Modbus registers van de VARME warmtepomp boiler uit  
+# Er moet nog veel verder uitgewerkt, de registers met Comments werken nog niet
+# Syntax van ESPHome is op aantal punten nog niet juist. 
+# =============================================================================
+
+
+
+  # Internal connections COSMAX13487EESA (MAX13487E‑compatible) — Half‑duplex RS485/RS422 transceiver with automatic direction control
+  # ESP32‑C6 PIN	RS485 TRANSCEIVER PIN
+  # GPIO4	nSHDN  Shutdown. Drive SHDN high to let the device operate in normal operation. Drive SHDN low to put the part in shutdown.
+  # GPIO5	nEN Receiver Output Enable. Drive RE low to enable the RO. Drive RE high to let the AutoDirection circuit control the receiver.
+  # GPIO6	RO Receiver Output. When receiver is enabled and V(A) - V(B) > +200mV, RO is high. If V(A) - V(B)< -200mV, RO is low.
+  # GPIO7	DI Driver Input. Drive DI low to force noninverting output low and inverting output high. Drive DI high to
+  # force noninverting output high and inverting output low. DI is an input to the internal state machine that automatically enables and disables the driver.
+
+  # uart_tx_pin: "GPIO7"
+  # uart_rx_pin: "GPIO6"
+  # uart_flowctrl_pin: "GPIO5"  # directly coded on UART !
+
+
+
+esphome:
+  name: ${device_name}
+  comment: "${device_description}"
+  name_add_mac_suffix: false
+  friendly_name: "${device_friendlyname}"
+
+esp32:
+  # board: esp32-c6-devkitc-1
+  flash_size: 4MB
+  variant: ESP32C6
+  # toolchain: esp-idf  # or 'platformio' (default)
+  framework:
+    type: esp-idf
+
+# Enable logging
+# level hier is het GECOMPILEERDE plafond: logger.set_level (bv. via de
+# "_Debug logging AAN/UIT" knoppen) kan dit runtime alleen omlaag/omhoog
+# zetten TOT AAN dit plafond, niet erboven. Staat dit op INFO, dan worden
+# ESP_LOGD/ESP_LOGW-regels bij het compileren volledig weggelaten en kan
+# geen enkele runtime-actie ze nog zichtbaar maken. Zet daarom DEBUG (of
+# VERY_VERBOSE) tijdens troubleshooten; zet terug naar INFO en herflash
+# zodra alles werkt om flash-ruimte/CPU te besparen.
+
+logger:
+  level: VERBOSE
+  initial_level: ERROR
+  baud_rate: 0
+  logs:
+    modbus: ERROR
+    uart_debug: ERROR
+
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_key
+
+ota:
+  - platform: esphome
+    encryption:
+
+wifi:
+  min_auth_mode: WPA2
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${device_friendlyname} Fallback"
+    password: !secret wifi_password
+
+web_server:
+  # Toont ook 'internal: true'-entiteiten op de lokale webpagina, zonder
+  # ze aan Home Assistant/de API bloot te stellen (voorkomt extra
+  # entiteiten in HA voor de ruwe HA-bronsensoren hieronder).
+  include_internal: true
+  version: 3
+
+captive_portal:
+
+
+output:
+  # Heartbeat status LED
+  - platform: gpio
+    id: statusLED
+    pin: GPIO19
+  - platform: gpio
+    id: SHDN_PIN # Shutdown RS-485 chip
+    pin:
+      number: GPIO4
+      inverted: true
+  
+
+# -----------------------------------------------------------------------
+# RS485 / Modbus server
+# -----------------------------------------------------------------------
+uart:
+  id: uart_modbus
+  tx_pin: GPIO7
+  rx_pin: GPIO6
+  baud_rate: ${baudrate}
+  data_bits: 8
+  stop_bits: 1
+  parity: EVEN
+  flow_control_pin: GPIO5   
+  debug:
+    direction: BOTH
+    after:
+      timeout: 200ms
+
+modbus:
+  id: varme_modbus
+  uart_id: uart_modbus
+  send_wait_time: 300ms
+  turnaround_time: 100ms
+  
+modbus_controller:
+  - id: varme
+    address: 0x1
+    modbus_id: varme_modbus
+    update_interval: 60s
+    command_throttle: 100ms
+    max_cmd_retries: 1
+
+
+# ==========================================================
+# INPUT REGISTERS
+# Modbus functie 04
+# ==========================================================
+
+sensor:
+
+  # --------------------------------------------------------
+  # T1 = verdampertemperatuur
+  # VT register 7
+  # --------------------------------------------------------
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Verdamper"
+    id: vt_t1
+    register_type: read
+    address: 7
+    value_type: S_WORD
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+
+  # --------------------------------------------------------
+  # T2 = boilertemperatuur
+  # VT register 8
+  # --------------------------------------------------------
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Boiler"
+    id: vt_t2
+    register_type: read
+    address: 8
+    value_type: S_WORD
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+
+# ==========================================================
+# BINARY INPUT REGISTERS
+# ==========================================================
+
+binary_sensor:
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Pressostaat"
+    id: vt_pressostaat
+    register_type: read
+    address: 0
+    bitmask: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW PV ingang"
+    id: vt_pv_input
+    register_type: read
+    address: 1
+    bitmask: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Compressor"
+    id: vt_compressor
+    register_type: read
+    address: 9
+    bitmask: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Elektrisch element"
+    id: vt_element
+    register_type: read
+    address: 10
+    bitmask: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Boiler functie"
+    id: vt_boiler
+    register_type: read
+    address: 11
+    bitmask: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Magneetventiel"
+    id: vt_valve
+    register_type: read
+    address: 12
+    bitmask: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Condensator"
+    id: vt_condenser
+    register_type: read
+    address: 13
+    bitmask: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Ventilator"
+    id: vt_fan
+    register_type: read
+    address: 14
+    bitmask: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Status"
+    id: vt_status
+    register_type: read
+    address: 16
+    bitmask: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Alarm"
+    id: vt_alarm
+    register_type: read
+    address: 18
+    bitmask: 1
+
+# ==========================================================
+# HOLDING REGISTERS - INSTELLINGEN
+# Modbus functie 03 lezen / functie 06 schrijven
+#
+# Bij ESPHome Number is holding de standaard.
+# ==========================================================
+
+number:
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Gewenste temperatuur"
+    id: vt_setpoint
+    address: 4
+    value_type: U_WORD
+    min_value: 5
+    max_value: 62
+    step: 1
+    unit_of_measurement: "°C"
+    entity_category: config
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW T minimum"
+    id: vt_tmin
+    address: 5
+    value_type: U_WORD
+    min_value: 5
+    max_value: 62
+    step: 1
+    unit_of_measurement: "°C"
+    entity_category: config
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW T2 minimum"
+    id: vt_t2min
+    address: 6
+    value_type: U_WORD
+    min_value: 5
+    max_value: 62
+    step: 1
+    unit_of_measurement: "°C"
+    entity_category: config
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW PV temperatuur WP"
+    id: vt_pv_wp_temp
+    address: 18
+    value_type: U_WORD
+    min_value: 5
+    max_value: 62
+    step: 1
+    unit_of_measurement: "°C"
+    entity_category: config
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW PV temperatuur element"
+    id: vt_pv_element_temp
+    address: 19
+    value_type: U_WORD
+    min_value: 5
+    max_value: 62
+    step: 1
+    unit_of_measurement: "°C"
+    entity_category: config
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW T maximum"
+    id: vt_tmax
+    address: 28
+    value_type: U_WORD
+    min_value: 5
+    max_value: 65
+    step: 1
+    unit_of_measurement: "°C"
+    entity_category: config
+
+# ==========================================================
+# SELECTS
+# ==========================================================
+
+select:
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Bedrijfsmodus"
+    id: vt_mode
+    address: 12
+    value_type: U_WORD
+    optionsmap:
+      "Uit": 0
+      "Alleen warmtepomp": 1
+      "Alleen element": 2
+      "Warmtepomp + element": 3
+      "Boiler": 4
+      "Warmtepomp + boiler": 5
+    entity_category: config
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Legionella"
+    id: vt_legionella
+    address: 13
+    value_type: U_WORD
+    optionsmap:
+      "Uit": 0
+      "60 °C": 1
+      "65 °C": 2
+    entity_category: config
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW PV modus"
+    id: vt_pv_mode
+    address: 17
+    value_type: U_WORD
+    optionsmap:
+      "Uit": 0
+      "Alleen warmtepomp": 1
+      "Alleen element": 2
+      "Warmtepomp + element": 3
+    entity_category: config
+
+# ==========================================================
+# SWITCHES
+# ==========================================================
+
+switch:
+
+  # --------------------------------------------------------
+  # Timer
+  # VT register 7
+  # --------------------------------------------------------
+
+  # - platform: modbus_controller
+  #   modbus_controller_id: varme
+  #   name: "VT180WW Timer"
+  #   address: 7
+  #   register_type: holding
+  #   bitmask: 1
+
+
+  # --------------------------------------------------------
+  # Boost
+  # VT register 22
+  # --------------------------------------------------------
+
+  - platform: modbus_controller
+    modbus_controller_id: varme
+    name: "VT180WW Boost"
+    address: 22
+    register_type: holding
+    bitmask: 1
+
+  # --------------------------------------------------------
+  # Verbose logging switch
+  # VT register 22
+  # --------------------------------------------------------
+
+
+  - platform: template
+    name: "_Logging UART raw byte"
+    icon: "mdi:chip"
+    optimistic: true
+    turn_on_action:
+      - logger.set_level:
+          level: DEBUG
+          tag: uart_debug
+    turn_off_action:
+      - logger.set_level:
+          level: ERROR
+          tag: uart_debug
+    entity_category: config
+
+
+
+button:
+  - platform: restart
+    name: "_Restart device"    
+   
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: _IP-adres
+      icon: mdi:ip-network
+    ssid:
+      name: _Netwerk
+      icon: mdi:access-point-network
+    mac_address:
+      name: _Mac-adres
+      icon: mdi:folder-key-network-outline
+
+  - platform: template
+    name: "_Config Version"
+    icon: "mdi:label-outline"
+    update_interval: 6h
+    lambda: return {"${version}"};
+
+  - platform: version
+    name: "_ESPHome Version"
+    hide_timestamp: true
+
+
+interval:
+  - interval: 3000ms
+    then:
+      - output.turn_on: statusLED
+      - delay: 150ms
+      - output.turn_off: statusLED
