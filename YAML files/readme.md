@@ -14,3 +14,6 @@
 #
 # Varme or Vesttherm heatpump boiler VT100WW, VT180WW and probably others (VT100C, VT180C, VT3120 etc)
 #   It can read Boiler temp, all diagnostic info and set different registers (eg. Boost) 
+#
+#  modbus-serialproxy.yaml
+# This is a generic Serial Proxy that can be used by HA to interface with Modbus device through serial proxy
