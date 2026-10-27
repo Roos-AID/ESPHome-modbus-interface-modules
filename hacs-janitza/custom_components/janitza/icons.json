@@ -1,0 +1,82 @@
+{
+  "entity": {
+    "sensor": {
+      "active_tariff": {
+        "default": "mdi:cash-clock"
+      },
+      "apparent_energy_l1": {
+        "default": "mdi:lightning-bolt-outline"
+      },
+      "apparent_energy_l2": {
+        "default": "mdi:lightning-bolt-outline"
+      },
+      "apparent_energy_l3": {
+        "default": "mdi:lightning-bolt-outline"
+      },
+      "apparent_energy_total": {
+        "default": "mdi:lightning-bolt-outline"
+      },
+      "ct_primary_l1": {
+        "default": "mdi:current-ac"
+      },
+      "ct_primary_l2": {
+        "default": "mdi:current-ac"
+      },
+      "ct_primary_l3": {
+        "default": "mdi:current-ac"
+      },
+      "ct_secondary_l1": {
+        "default": "mdi:current-ac"
+      },
+      "ct_secondary_l2": {
+        "default": "mdi:current-ac"
+      },
+      "ct_secondary_l3": {
+        "default": "mdi:current-ac"
+      },
+      "rotation_field": {
+        "default": "mdi:rotate-right",
+        "state": {
+          "left": "mdi:rotate-left",
+          "none": "mdi:sync-off"
+        }
+      },
+      "thd_current_l1": {
+        "default": "mdi:sine-wave"
+      },
+      "thd_current_l2": {
+        "default": "mdi:sine-wave"
+      },
+      "thd_current_l3": {
+        "default": "mdi:sine-wave"
+      },
+      "thd_voltage_l1": {
+        "default": "mdi:sine-wave"
+      },
+      "thd_voltage_l2": {
+        "default": "mdi:sine-wave"
+      },
+      "thd_voltage_l3": {
+        "default": "mdi:sine-wave"
+      },
+      "vt_primary_l1": {
+        "default": "mdi:sine-wave"
+      },
+      "vt_primary_l2": {
+        "default": "mdi:sine-wave"
+      },
+      "vt_primary_l3": {
+        "default": "mdi:sine-wave"
+      },
+      "vt_secondary_l1": {
+        "default": "mdi:sine-wave"
+      },
+      "vt_secondary_l2": {
+        "default": "mdi:sine-wave"
+      },
+      "vt_secondary_l3": {
+        "default": "mdi:sine-wave"
+      }
+    }
+  }
+}

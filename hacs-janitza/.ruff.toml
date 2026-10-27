@@ -1,0 +1,40 @@
+# The contents of this file is based on https://github.com/home-assistant/core/blob/dev/pyproject.toml
+
+target-version = "py314"
+
+# The vendored device library is linted, typed and tested in its own
+# repository; scripts/vendor copies it in unchanged.
+extend-exclude = ["custom_components/janitza/janitza_modbus"]
+
+[lint]
+select = [
+    "ALL",
+]
+
+ignore = [
+    "ANN401", # Dynamically typed expressions (typing.Any) are disallowed
+    "D203", # no-blank-line-before-class (incompatible with formatter)
+    "D212", # multi-line-summary-first-line (incompatible with formatter)
+    "COM812", # incompatible with formatter
+    "ISC001", # incompatible with formatter
+]
+
+[lint.flake8-pytest-style]
+fixture-parentheses = false
+
+[lint.pyupgrade]
+keep-runtime-typing = true
+
+[lint.mccabe]
+max-complexity = 25
+
+[lint.per-file-ignores]
+"tests/*" = [
+    "ARG001", # fixtures requested for their side effect
+    "ARG005", # lambdas standing in for a callback's full signature
+    "PLR0913", # tests take what fixtures they need
+    "PLR2004", # the expected values are the point of a test
+    "S101", # pytest asserts
+    "TC002", # imports a test also uses at runtime
+    "TC003",
+]

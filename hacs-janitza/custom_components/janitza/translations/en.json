@@ -1,0 +1,315 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Device is already configured",
+      "reconfigure_successful": "Re-configuration was successful",
+      "unique_id_mismatch": "Please reconfigure the same meter you originally set up."
+    },
+    "error": {
+      "cannot_connect": "Failed to connect: {error}",
+      "unrecognized_meter": "The device answered, but did not report a serial number to identify it by.",
+      "unrecognized_umg508": "The device answered, but refused the UMG 508 measurement values. Check the model and the Modbus unit ID."
+    },
+    "step": {
+      "connection": {
+        "description": "A Janitza power analyser can be set up in Home Assistant in two different ways.\n\nYou can reach it over the network, which covers the Ethernet models and a Modbus TCP gateway, or over a serial port its RS485 terminals are wired to, which covers ports shared over the network by a serial proxy.",
+        "menu_options": {
+          "serial": "Serial port (Modbus RTU)",
+          "tcp": "Network (Modbus TCP)"
+        }
+      },
+      "reconfigure_serial": {
+        "data": {
+          "baudrate": "Baud rate",
+          "device": "Serial port",
+          "unit_id": "Modbus unit ID"
+        },
+        "data_description": {
+          "baudrate": "The speed of the RS485 bus, as set on the meter. The UMG 96RM default is 115200.",
+          "device": "The serial port the meter's RS485 bus is wired to. Ports shared over the network by a serial proxy, such as an ESPHome device, are listed here alongside the local ones.",
+          "unit_id": "The meter's Modbus unit ID, also called its device address. The default is 1. A UMG 508 reached over Ethernet answers to the address set for its RS485 interface."
+        },
+        "description": "Reach this meter over a serial port wired to its RS485 terminals."
+      },
+      "reconfigure_tcp": {
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "unit_id": "Modbus unit ID"
+        },
+        "data_description": {
+          "host": "The hostname or IP address of the meter, or of the Modbus TCP gateway it's connected through.",
+          "port": "The Modbus TCP port to connect on.",
+          "unit_id": "The meter's Modbus unit ID, also called its device address. The default is 1. A UMG 508 reached over Ethernet answers to the address set for its RS485 interface."
+        },
+        "description": "Reach this meter over the network, either directly or through a Modbus TCP gateway."
+      },
+      "serial": {
+        "data": {
+          "baudrate": "Baud rate",
+          "device": "Serial port",
+          "unit_id": "Modbus unit ID"
+        },
+        "data_description": {
+          "baudrate": "The speed of the RS485 bus, as set on the meter. The UMG 96RM default is 115200.",
+          "device": "The serial port the meter's RS485 bus is wired to. Ports shared over the network by a serial proxy, such as an ESPHome device, are listed here alongside the local ones.",
+          "unit_id": "The meter's Modbus unit ID, also called its device address. The default is 1. A UMG 508 reached over Ethernet answers to the address set for its RS485 interface."
+        },
+        "description": "Set up a meter wired to a serial port over RS485."
+      },
+      "tcp": {
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "unit_id": "Modbus unit ID"
+        },
+        "data_description": {
+          "host": "The hostname or IP address of the meter, or of the Modbus TCP gateway it's connected through.",
+          "port": "The Modbus TCP port to connect on.",
+          "unit_id": "The meter's Modbus unit ID, also called its device address. The default is 1. A UMG 508 reached over Ethernet answers to the address set for its RS485 interface."
+        },
+        "description": "Set up a meter reached over the network: a UMG 508 or an Ethernet model of the UMG 96RM directly, or an RS485 meter through a Modbus TCP gateway."
+      },
+      "user": {
+        "description": "Which Janitza power analyser do you want to set up?",
+        "menu_options": {
+          "umg_508": "UMG 508",
+          "umg_96rm": "UMG 96RM"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "active_energy_consumed_all_tariffs": {
+        "name": "Energy consumed (all tariffs)"
+      },
+      "active_energy_consumed_l1": {
+        "name": "Energy consumed L1"
+      },
+      "active_energy_consumed_l2": {
+        "name": "Energy consumed L2"
+      },
+      "active_energy_consumed_l3": {
+        "name": "Energy consumed L3"
+      },
+      "active_energy_consumed_total": {
+        "name": "Energy consumed"
+      },
+      "active_energy_delivered_all_tariffs": {
+        "name": "Energy delivered (all tariffs)"
+      },
+      "active_energy_delivered_l1": {
+        "name": "Energy delivered L1"
+      },
+      "active_energy_delivered_l2": {
+        "name": "Energy delivered L2"
+      },
+      "active_energy_delivered_l3": {
+        "name": "Energy delivered L3"
+      },
+      "active_energy_delivered_total": {
+        "name": "Energy delivered"
+      },
+      "active_energy_l1": {
+        "name": "Net energy L1"
+      },
+      "active_energy_l2": {
+        "name": "Net energy L2"
+      },
+      "active_energy_l3": {
+        "name": "Net energy L3"
+      },
+      "active_energy_total": {
+        "name": "Net energy"
+      },
+      "active_power_l1": {
+        "name": "Active power L1"
+      },
+      "active_power_l2": {
+        "name": "Active power L2"
+      },
+      "active_power_l3": {
+        "name": "Active power L3"
+      },
+      "active_power_total": {
+        "name": "Active power"
+      },
+      "active_tariff": {
+        "name": "Active tariff"
+      },
+      "apparent_energy_l1": {
+        "name": "Apparent energy L1"
+      },
+      "apparent_energy_l2": {
+        "name": "Apparent energy L2"
+      },
+      "apparent_energy_l3": {
+        "name": "Apparent energy L3"
+      },
+      "apparent_energy_total": {
+        "name": "Apparent energy"
+      },
+      "apparent_power_l1": {
+        "name": "Apparent power L1"
+      },
+      "apparent_power_l2": {
+        "name": "Apparent power L2"
+      },
+      "apparent_power_l3": {
+        "name": "Apparent power L3"
+      },
+      "cos_phi_l1": {
+        "name": "Power factor L1"
+      },
+      "cos_phi_l2": {
+        "name": "Power factor L2"
+      },
+      "cos_phi_l3": {
+        "name": "Power factor L3"
+      },
+      "ct_primary_l1": {
+        "name": "CT primary L1"
+      },
+      "ct_primary_l2": {
+        "name": "CT primary L2"
+      },
+      "ct_primary_l3": {
+        "name": "CT primary L3"
+      },
+      "ct_secondary_l1": {
+        "name": "CT secondary L1"
+      },
+      "ct_secondary_l2": {
+        "name": "CT secondary L2"
+      },
+      "ct_secondary_l3": {
+        "name": "CT secondary L3"
+      },
+      "current_l1": {
+        "name": "Current L1"
+      },
+      "current_l2": {
+        "name": "Current L2"
+      },
+      "current_l3": {
+        "name": "Current L3"
+      },
+      "current_n": {
+        "name": "Neutral current"
+      },
+      "reactive_energy_capacitive_l1": {
+        "name": "Capacitive reactive energy L1"
+      },
+      "reactive_energy_capacitive_l2": {
+        "name": "Capacitive reactive energy L2"
+      },
+      "reactive_energy_capacitive_l3": {
+        "name": "Capacitive reactive energy L3"
+      },
+      "reactive_energy_capacitive_total": {
+        "name": "Capacitive reactive energy"
+      },
+      "reactive_energy_inductive_l1": {
+        "name": "Inductive reactive energy L1"
+      },
+      "reactive_energy_inductive_l2": {
+        "name": "Inductive reactive energy L2"
+      },
+      "reactive_energy_inductive_l3": {
+        "name": "Inductive reactive energy L3"
+      },
+      "reactive_energy_inductive_total": {
+        "name": "Inductive reactive energy"
+      },
+      "reactive_energy_l1": {
+        "name": "Reactive energy L1"
+      },
+      "reactive_energy_l2": {
+        "name": "Reactive energy L2"
+      },
+      "reactive_energy_l3": {
+        "name": "Reactive energy L3"
+      },
+      "reactive_power_l1": {
+        "name": "Reactive power L1"
+      },
+      "reactive_power_l2": {
+        "name": "Reactive power L2"
+      },
+      "reactive_power_l3": {
+        "name": "Reactive power L3"
+      },
+      "rotation_field": {
+        "name": "Phase rotation",
+        "state": {
+          "left": "Counter-clockwise",
+          "none": "No rotation",
+          "right": "Clockwise"
+        }
+      },
+      "thd_current_l1": {
+        "name": "Current THD L1"
+      },
+      "thd_current_l2": {
+        "name": "Current THD L2"
+      },
+      "thd_current_l3": {
+        "name": "Current THD L3"
+      },
+      "thd_voltage_l1": {
+        "name": "Voltage THD L1"
+      },
+      "thd_voltage_l2": {
+        "name": "Voltage THD L2"
+      },
+      "thd_voltage_l3": {
+        "name": "Voltage THD L3"
+      },
+      "voltage_l1_l2": {
+        "name": "Voltage L1-L2"
+      },
+      "voltage_l1_n": {
+        "name": "Voltage L1-N"
+      },
+      "voltage_l2_l3": {
+        "name": "Voltage L2-L3"
+      },
+      "voltage_l2_n": {
+        "name": "Voltage L2-N"
+      },
+      "voltage_l3_l1": {
+        "name": "Voltage L3-L1"
+      },
+      "voltage_l3_n": {
+        "name": "Voltage L3-N"
+      },
+      "vt_primary_l1": {
+        "name": "VT primary L1"
+      },
+      "vt_primary_l2": {
+        "name": "VT primary L2"
+      },
+      "vt_primary_l3": {
+        "name": "VT primary L3"
+      },
+      "vt_secondary_l1": {
+        "name": "VT secondary L1"
+      },
+      "vt_secondary_l2": {
+        "name": "VT secondary L2"
+      },
+      "vt_secondary_l3": {
+        "name": "VT secondary L3"
+      }
+    }
+  },
+  "exceptions": {
+    "modbus_error": {
+      "message": "Error communicating with the meter."
+    },
+    "no_component_answered": {
+      "message": "No component answered."
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "domain": "janitza",
+  "name": "Janitza",
+  "codeowners": [
+    "@OWNER"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "modbus",
+    "usb"
+  ],
+  "documentation": "https://github.com/OWNER/hacs-janitza",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/OWNER/hacs-janitza/issues",
+  "loggers": [
+    "custom_components.janitza",
+    "modbus_connection",
+    "tmodbus"
+  ],
+  "requirements": [],
+  "version": "0.2.0"
+}

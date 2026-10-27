@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Copy the janitza_modbus package from a janitza-modbus checkout into the
+# integration, replacing the vendored copy.
+#
+#   scripts/vendor ../janitza-modbus
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+source="${1:?usage: scripts/vendor <path to a janitza-modbus checkout>}"
+package="${source}/src/janitza_modbus"
+target="custom_components/janitza/janitza_modbus"
+
+if [[ ! -f "${package}/__init__.py" ]]; then
+    echo "No janitza_modbus package under ${source}/src" >&2
+    exit 1
+fi
+
+version="$(git -C "${source}" describe --tags --always 2>/dev/null || echo unknown)"
+
+# Keep the notes that belong to the vendored copy, replace the code.
+find "${target}" -name '*.py' -delete
+cp "${package}"/*.py "${package}/py.typed" "${target}/"
+cp "${source}/LICENSE" "${target}/LICENSE"
+echo "${version}" > "${target}/VERSION"
+
+echo "Vendored janitza_modbus ${version} into ${target}"
